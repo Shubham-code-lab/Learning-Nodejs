@@ -1,0 +1,23 @@
+//- this files is extended by other pug files
+doctype html
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        //- page title should be passed as property in object passed to render() as it is present in common layout file
+        title #{pageTitle}
+        link(rel="stylesheet", href="/css/main.css")
+        //- content that is diffrent for diffrent files
+        block cssLinks
+    body 
+        header.main-header
+            nav.main-header__nav
+                ul.main-header__item-list
+                    li.main-header__item
+                        //- adding class depending upon dynamic content
+                        a(href="/", class=(pageTitle === 'Shop'?'active': '')) Shop
+                    li.main-header__item
+                        a(href="/admin/add-product", class=(pageTitle === 'Add Product'? 'active' : "")) Add Product
+        //- content that is diffrent for diffrent files
+        block content
