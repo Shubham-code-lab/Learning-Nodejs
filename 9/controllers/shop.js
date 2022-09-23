@@ -14,10 +14,20 @@ exports.getIndex = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
   console.log("get cart");
-  res.render('shop/cart', {
-    path: '/cart',
-    pageTitle: 'Your Cart'
-  });
+  Cart.getCartProducts(cart=>{
+    Product.fetchAll(products=>{
+      const cartProducts = [];
+      for(idAndQuatity of cart.products){
+        const productData = products.find(product=>parseFloat(product.id) === parseFloat(idAndQuatity.id))
+        cartProducts.push({productData,qty: idAndQuatity.qty});
+      }
+      res.render('shop/cart', {
+        path: '/cart',
+        pageTitle: 'Your Cart',
+        products: cartProducts,
+      });
+    })
+  })
 };
 
 exports.postCart = (req, res , next)=>{
@@ -25,10 +35,16 @@ exports.postCart = (req, res , next)=>{
   const prodId = req.body.productId;
   Product.findById(prodId, (product)=>{
     Cart.addProduct(prodId, product.price);
-    res.render('shop/cart', {
-      path: '/cart',
-      pageTitle: 'Your Cart'
-    });
+    res.redirect('/cart');
+  });
+}
+
+
+exports.postCardDeleteItem = (req,res,next)=>{
+  const prodId = req.body.productId;
+  Product.findById(prodId,(product)=>{
+    Cart.deleteProduct(prodId, product.price);
+    res.redirect('/cart');
   });
 }
 

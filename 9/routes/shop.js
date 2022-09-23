@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 
 const shopController = require('../controllers/shop');
+const { route } = require('./admin');
 
 const router = express.Router();
 
@@ -17,6 +18,8 @@ router.get('/orders', shopController.getOrders);
 router.get('/checkout', shopController.getCheckout);
 
 router.get('/products', shopController.getProducts);
+
+router.post('/cart-delete-item', shopController.postCardDeleteItem);
 
 router.get('/products/:productId', shopController.getProduct); //function calling order //getProduct(),findById(cb1),getProductsFromFile(cb2),cb2(),cb1()
 

@@ -30,20 +30,30 @@ module.exports = class Cart{
                 cart.products.push({id, qty:1});
                 console.log("cart add new product");
             }
-            cart.totalPrice = +cart.totalPrice + +productPrice;
+            cart.totalPrice = (+cart.totalPrice + +productPrice).toFixed(2);
             fs.writeFile(p, JSON.stringify(cart), (err)=>console.log(err));
+        })
+    }
+
+    static getCartProducts(cb){
+        fs.readFile(p, (err, fileContent)=>{
+            const cart = JSON.parse(fileContent);
+            if(err)cb(null);
+            else cb(cart);
         })
     }
 
     static deleteProduct(id, productPrice){
         fs.readFile(p, (err, fileContent)=>{
             if(err)return;
+            console.log(id, productPrice);
             const cart = JSON.parse(fileContent);
             const existProduct = cart.products.find(product=>parseFloat(product.id) === parseFloat(id))
             if(existProduct){
                 const newCartPrducts = cart.products.filter(product=> parseFloat(product.id) !== parseFloat(id));
-                const newCartPrice = cart.totalPrice - productPrice * existProduct.qty;
+                const newCartPrice = (+cart.totalPrice).toFixed(2) - (productPrice * existProduct.qty).toFixed(2);
                 const updatedCart = {products:[...newCartPrducts], totalPrice: newCartPrice};
+                console.log("Updated cart", updatedCart);
                 fs.writeFile(p, JSON.stringify(updatedCart), (err)=>console.log(err));
             }
         })
