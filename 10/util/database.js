@@ -6,3 +6,5 @@ const pool = mysql.createPool({       //reach out to pool when we have to run qu
     database: 'node-complete',
     password: '8806166977a'
 });  //pool is finished when our application shut down
+
+module.exports = pool.promise();
