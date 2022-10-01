@@ -4,7 +4,7 @@ const Cart = require('../models/cart');
 exports.getProducts = (req, res, next) => {
   // we can add where condition in findAll method
   Product.findAll()
-    .then(products=>{
+    .then(products=>{                  //[product:{dataValues:{},metaData:{}},product:{dataValues:{},metaData:{}}]
       res.render('shop/product-list', {
         prods: products,
         pageTitle: 'All Products',
@@ -18,7 +18,7 @@ exports.getProduct = (req, res, next) => {
   const prodId = req.params.productId;
 
   // Product.findAll({where: {id: prodId}})
-  // .then(([{dataValues}])=>{      //[product:{dataValues:{},{}}]
+  // .then(([{dataValues}])=>{        //[product:{dataValues:{},metaData:{}},product:{dataValues:{},metaData:{}}]
   //   res.render('shop/product-detail', {
   //     product: dataValues,
   //     pageTitle: dataValues.title,
@@ -29,11 +29,11 @@ exports.getProduct = (req, res, next) => {
 
 
   Product.findOne ({where: {id: prodId}})
-    .then(({dataValues}) => {        //product:{dataValues:{},{}}
+    .then(({dataValues}) => {         //product:{dataValues:{},metaData:{}}
       res.render('shop/product-detail', {
         product: dataValues,
         pageTitle: dataValues.title,
-        path: '/products'
+        path: '/products/any'
       });
     })
     .catch(err => console.log(err));
@@ -42,7 +42,7 @@ exports.getProduct = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
   // we can add where condition in findAll method
   Product.findAll()
-    .then(products=>{      //[product:{dataValues:{},{}},product:{dataValues:{},{}}]
+    .then(products=>{                 //[product:{dataValues:{},metaData:{}},product:{dataValues:{},metaData:{}}]
       res.render('shop/index', {
       prods: products,
       pageTitle: 'Shop',
