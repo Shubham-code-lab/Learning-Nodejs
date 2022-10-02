@@ -17,6 +17,7 @@ exports.postAddProduct = (req, res, next) => {
   Product.create({title,imageUrl,price, description})
          .then(result=>{
           // console.log(result);
+          console.log("new product is added");
           res.redirect('/admin/products');
         })
          .catch(err=>console.log(err));
@@ -87,5 +88,4 @@ exports.postDeleteProduct = (req, res, next) => {
     res.redirect('/admin/products');
   })
   .catch(err=>console.log(err));   //findOne() and destroy()
-  
 };
