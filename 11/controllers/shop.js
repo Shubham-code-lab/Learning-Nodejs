@@ -40,6 +40,7 @@ exports.getProduct = (req, res, next) => {
 };
 
 exports.getIndex = (req, res, next) => {
+  console.log("shop index");
   // we can add where condition in findAll method
   Product.findAll()
     .then(products=>{                 //[product:{dataValues:{},metaData:{}},product:{dataValues:{},metaData:{}}]
