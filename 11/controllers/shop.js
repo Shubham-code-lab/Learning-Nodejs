@@ -54,52 +54,117 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getCart = (req, res, next) => {
-  Cart.getCart(cart => {
-    Product.fetchAll(products => {
-      const cartProducts = [];
-      for (product of products) {
-        const cartProductData = cart.products.find(
-          prod => prod.id === product.id
-        );
-        if (cartProductData) {
-          cartProducts.push({ productData: product, qty: cartProductData.qty });
-        }
-      }
-      res.render('shop/cart', {
-        path: '/cart',
-        pageTitle: 'Your Cart',
-        products: cartProducts
+  console.log(req.user.cart);
+  req.user.getCart()             //one to one realtion so we get just one value hence it is singular getCart() not getCarts()
+  .then(cart=>cart.getProducts())//many to many realtions so prular getProducts()  
+  .then(cartProducts=>{
+    res.render('shop/cart', {
+            path: '/cart',
+            pageTitle: 'Your Cart',
+            products: cartProducts
       });
-    });
-  });
+  })
+  // Cart.getCart(cart => {
+  //   Product.fetchAll(products => {
+  //     const cartProducts = [];
+  //     for (product of products) {
+  //       const cartProductData = cart.products.find(
+  //         prod => prod.id === product.id
+  //       );
+  //       if (cartProductData) {
+  //         cartProducts.push({ productData: product, qty: cartProductData.qty });
+  //       }
+  //     }
+  //     res.render('shop/cart', {
+  //       path: '/cart',
+  //       pageTitle: 'Your Cart',
+  //       products: cartProducts
+  //     });
+  //   });
+  // });
 };
 
 exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findById(prodId, product => {
-    Cart.addProduct(prodId, product.price);
-  });
-  res.redirect('/cart');
+  let fetchedCart;
+  let newQuantity = 1;
+  req.user.getCart()   //user with one cart
+  .then(cart=>{
+    fetchedCart = cart;
+    return cart.getProducts({where:{id: prodId}})  //cart with many product
+  })
+  .then(products=>{
+    let product
+    if(products.length > 0)            //if product already in the cart
+      product = products[0];
+    if(product){
+      let oldQuantity = product.cartItem.quantity;   //product have have access to cartItem as it is through table
+      newQuantity += oldQuantity;
+      return product                   //get product from cart as it exist and quantity++
+    }
+    return Product.findOne({where:{id:prodId}})    //get product from Product table       //product and Product is diffrent
+  })
+  .then(product=>{
+    return fetchedCart.addProduct(product,{through:{quantity: newQuantity}})   //add product in the cart
+  })
+  // .catch(err=>{console.log(err)})
+  .then(()=>{
+    res.redirect('/cart');
+  })
+  .catch(err=>console.log(err));
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findById(prodId, product => {
-    Cart.deleteProduct(prodId, product.price);
-    res.redirect('/cart');
-  });
+  req.user.getCart()                                  //user with one cart
+  .then(cart=>cart.getProducts({where:{id:prodId}}))  //cart with many products
+  .then(products=>products[0].cartItem.destroy())     //product cart relation ship through cartIteam and then destroy()
+  .then(()=>res.redirect('/cart'))
+  .catch(err=>console.log(err))
 };
 
-exports.getOrders = (req, res, next) => {
-  res.render('shop/orders', {
-    path: '/orders',
-    pageTitle: 'Your Orders'
-  });
-};
 
 exports.getCheckout = (req, res, next) => {
   res.render('shop/checkout', {
     path: '/checkout',
     pageTitle: 'Checkout'
   });
+};
+
+exports.postOrder = (req, res, next)=>{
+  console.log("post Order");
+let fetchCart;
+ req.user.getCart()
+ .then(cart=>{
+  fetchCart = cart;
+  cart.getProducts();
+  })
+ .then(products=>{
+  console.log(products);
+    return req.user.createOrder()
+    .then(order=>{
+      return order.addProducts(products.map(product=>{
+        product.orderItem = {quantity: product.cartItem.quantity}
+        return product
+      }));
+    })
+    .catch(err=>console.log(err));
+ })
+ .then(result=>{
+   return fetchCart.setProducts(null);      //reseting through cartItem table
+ })
+ .then(result=>{res.redirect('/orders')})
+ .catch(err=>console.log(err));
+}
+
+exports.getOrders = (req, res, next) => {
+  req.user.getOrders({include: ['products']})
+  .then(orders=>{
+    res.render('shop/orders', {
+      path: '/orders',
+      pageTitle: 'Your Orders',
+      orders
+    });
+  })
+  .catch(err=>console.log(err));
 };

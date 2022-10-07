@@ -6,12 +6,15 @@ const bodyParser = require('body-parser');
 const errorController = require('./controllers/error');
 const sequelize = require('./util/database');
 
-const Product = require('./models/product');
-const CartItem = require('./models/cart-iteam');
-const User = require('./models/user');
 const adminRoutes = require('./routes/admin'); 
 const shopRoutes = require('./routes/shop');
+
+const User = require('./models/user');
+const Product = require('./models/product');
 const Cart = require('./models/cart');
+const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -49,6 +52,12 @@ Cart.belongsTo(User); //one cart has one user
 Cart.belongsToMany(Product, {through: CartItem}); //same cart has many product
 Product.belongsToMany(Cart,  {through: CartItem}); //same product in many cart
 
+User.hasMany(Order);
+Order.belongsTo(User);
+
+Order.belongsToMany(Product, {through: OrderItem});
+Product.belongsToMany(Order, {through: OrderItem});
+
 //create table and relation
 //force true recreate table each time even when they exist
 sequelize
@@ -64,9 +73,8 @@ sequelize
         return User.create({name:"Shubham", email:"shubhamshinde@gmail.com"});
     return user;
 })
-.then(reuslt=>{
-    app.listen(3000);
-})
+.then(user=>user.createCart())
+.then(cart=>app.listen(3000))
 .catch(err=>{
     console.log(err);
 })
