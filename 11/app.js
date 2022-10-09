@@ -29,8 +29,7 @@ app.use((req,res,next)=>{                   //execute for all rounte
         .then(user=>{
             req.user = user;            //we can set our own property to req object
             next();     //call next only when we set req.user as this is asyncronice code 
-        })
-        
+        })        
 })
 
 app.use('/admin', adminRoutes);

@@ -1,0 +1,4 @@
+Wrong:-
+	Product.findById(12)
+Right:-
+	Product.findByPk(12)

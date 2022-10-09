@@ -1,0 +1,5 @@
+Wrong:-
+	process.mainModule.filename
+Right:-
+	require.main.filename
+

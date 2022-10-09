@@ -64,24 +64,6 @@ exports.getCart = (req, res, next) => {
             products: cartProducts
       });
   })
-  // Cart.getCart(cart => {
-  //   Product.fetchAll(products => {
-  //     const cartProducts = [];
-  //     for (product of products) {
-  //       const cartProductData = cart.products.find(
-  //         prod => prod.id === product.id
-  //       );
-  //       if (cartProductData) {
-  //         cartProducts.push({ productData: product, qty: cartProductData.qty });
-  //       }
-  //     }
-  //     res.render('shop/cart', {
-  //       path: '/cart',
-  //       pageTitle: 'Your Cart',
-  //       products: cartProducts
-  //     });
-  //   });
-  // });
 };
 
 exports.postCart = (req, res, next) => {
@@ -123,42 +105,34 @@ exports.postCartDeleteProduct = (req, res, next) => {
   .catch(err=>console.log(err))
 };
 
-
-exports.getCheckout = (req, res, next) => {
-  res.render('shop/checkout', {
-    path: '/checkout',
-    pageTitle: 'Checkout'
-  });
-};
-
 exports.postOrder = (req, res, next)=>{
   console.log("post Order");
-let fetchCart;
- req.user.getCart()
+  let fetchCart;  
+ req.user.getCart()      //user with one cart
  .then(cart=>{
   fetchCart = cart;
-  cart.getProducts();
+  cart.getProducts();    //cart with many product
   })
  .then(products=>{
   console.log(products);
-    return req.user.createOrder()
+    return req.user.createOrder() //creating new order
     .then(order=>{
-      return order.addProducts(products.map(product=>{
-        product.orderItem = {quantity: product.cartItem.quantity}
+      return order.addProducts(products.map(product=>{       //hard to undersand
+        product.orderItem = {quantity: product.cartItem.quantity}    //product has access to cartItem
         return product
       }));
     })
     .catch(err=>console.log(err));
  })
  .then(result=>{
-   return fetchCart.setProducts(null);      //reseting through cartItem table
+   return fetchCart.setProducts(null);      //reseting through cartItem table //so as to remove all item from cart
  })
  .then(result=>{res.redirect('/orders')})
  .catch(err=>console.log(err));
 }
 
 exports.getOrders = (req, res, next) => {
-  req.user.getOrders({include: ['products']})
+  req.user.getOrders({include: ['products']})    //hard to understand
   .then(orders=>{
     res.render('shop/orders', {
       path: '/orders',
