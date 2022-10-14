@@ -2,24 +2,32 @@ const mongodb = require('mongodb');
 const getDB = require('../util/database').getDB;
 
 class Product{
-  constructor(title, imageUrl, price ,description, id){
+  constructor(title, imageUrl, price ,description, id, userId){   //id is set null when creating product otherwise ObjectId when we want to update
     this.title =title;
     this.price = price;
-    this.description = description;
+    this.description = description; 
     this.imageUrl = imageUrl;
-    this._id = id;
+    console.log("constructor id ", userId)
+    this.userId = userId;
+    if(id)
+    this._id = new mongodb.ObjectId(id);
+    else
+    this._id = id;    
+    console.log("udefine ObjectId",new mongodb.ObjectId(undefined)); //while updateing this._id will be of type mongodb.ObjectId() //{_id:this._id}//{$set:{_id:this._id}}
   }
 
   save(){
     const db = getDB();
     let dbOP;
-    if(this._id){  //update
-      dbOP = db.collection('products').updateOne({_id: new mongodb.ObjectId(this._id)}, {$set: this})  //OR {$set:{title:this.title,......}}
-    }
+   if(this._id){  //update
+      console.log(new mongodb.ObjectId(this._id));   //condition     //key value to update
+      dbOP = db.collection('products').updateOne({_id: this._id}, {$set: this})  //OR {$set:{title:this.title,......}}
+    }                                  //updateMany()
     else{
       // add to existing collecction or create new collection
+      console.log("================id to save",this);
        dbOP = db.collection('products').insertOne(this)  //this is just object  //insertOne({})   //insertMany([{},{}])
-    }
+    }                                   //insertMany()
     return dbOP.then(result=>console.log(result))
     .catch(err=>console.log(err))
   }
@@ -35,7 +43,7 @@ class Product{
     })
     .catch(err=>console.log(err));
   }
-
+  
   static findById(prodId){
     const db = getDB();
     return db.collection('products')
@@ -50,6 +58,16 @@ class Product{
     .catch(err=>console.log(err))
   }
 
+  static deleteById(prodId){
+    const db = getDB();
+    return db.collection('products')
+    .deleteOne({_id: new mongodb.ObjectId(prodId)})
+    .then(result=>{
+      console.log(result)
+      return result;
+    })
+    .catch(err=>console.log(err))
+  }
 }
 
 module.exports = Product;
