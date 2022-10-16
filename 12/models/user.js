@@ -57,7 +57,7 @@ class User{
 
   addOrder(){
     const db = getDb();
-    return this.getCartProducts()    //gettinf cart product by memeber method
+    return this.getCartProducts()    //getting cart product by memeber method
     .then(products=>{                //[{productDetail also contain quantity property},{productDetail also contain quantity property}]
       const order = {                //order  format to insert
         items: products,
@@ -79,7 +79,7 @@ class User{
     const db = getDb();
     return db.collection('orders').find({'user._id': new mongodb.ObjectId(this._id)}).toArray() 
     //result:- [{_id,items:[{productDetail also contain quantity property},{productDetail also contain quantity property}],user:{_id,name}},{_id,items:[{productDetail also contain quantity property},{productDetail also contain quantity property}],user:{_id,name}}]
-    .then(result=>{
+    .then(result=>{f
       // console.log("get orders", result);
       return result;
     })

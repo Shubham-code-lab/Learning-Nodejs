@@ -9,10 +9,10 @@ class Product{
     this.imageUrl = imageUrl;
     console.log("constructor id ", userId)
     this.userId = userId;
-    if(id)
+    if(id)                                   //true while updating 
     this._id = new mongodb.ObjectId(id);
     else
-    this._id = id;    
+    this._id = id;                           //true while inserting
     console.log("udefine ObjectId",new mongodb.ObjectId(undefined)); //while updateing this._id will be of type mongodb.ObjectId() //{_id:this._id}//{$set:{_id:this._id}}
   }
 
