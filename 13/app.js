@@ -19,9 +19,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  User.findById('5baa2528563f16379fc8a610')
+  User.findById('634cf44a51a2251fd8ec6409')  //type coersion into ObjectId
     .then(user => {
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      req.user = user;   //as user is special mongoose model so we can use method on it
       next();
     })
     .catch(err => console.log(err));
@@ -33,10 +33,23 @@ app.use(shopRoutes);
 app.use(errorController.get404);
 
 mongoose
-  .connect(
-    'mongodb+srv://maximilian:9u4biljMQc4jjqbe@cluster0-ntrwp.mongodb.net/test?retryWrites=true'
-  )
+  .connect(                                                         //if "shop" not provided it create database name "test"
+    'mongodb+srv://Shubham:8806166977a@cluster0.pjapwbk.mongodb.net/shop?retryWrites=true&w=majority'
+  )      
   .then(result => {
+    User.findOne()              //return first document it find
+    .then(user=>{
+      if(!user){                //create ne user only if there is no user
+        const user = new User({
+          name: "Shubham",
+          email: "s@gmail.com",
+          cart: {
+            items:[]
+          }
+        });
+        return user.save()
+      }
+    })
     app.listen(3000);
   })
   .catch(err => {
