@@ -93,9 +93,6 @@ UserSchema.methods.addOrder = function(products){  //[{product detail with quant
     });
 }
 
-UserSchema.methods.getOrder = function(){
-  this.find({})
-}
 
 
 module.exports = mongoose.model('User', UserSchema);

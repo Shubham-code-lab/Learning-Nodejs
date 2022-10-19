@@ -1,0 +1,6 @@
+not working :- mongoose removed execPopulate
+ .populate()
+ .execPopulate()
+
+working :-
+ .populate()
