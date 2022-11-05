@@ -8,8 +8,8 @@ const transporter = nodemailer.createTransport(   //tell nodemailer how to deliv
   {
     service: 'gmail',
     auth: {
-      user: 'shubhamhemant08@gmail.com',
-      pass: 'ueylblefnlvyblnv'
+      user: 'shubhamhemant08@gmail.com',  //follow bellow process to allow nodemailer to send email through email id having 2-step verifaction
+      pass: 'ueylblefnlvyblnv'           //https://stackoverflow.com/questions/45478293/username-and-password-not-accepted-when-using-nodemailer
     }
   }
 );
