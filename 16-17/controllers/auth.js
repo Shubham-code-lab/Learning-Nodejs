@@ -1,7 +1,6 @@
 const crypto = require('crypto');     //create secure randow values built in library
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');  
-const sendgridTransport = require('nodemailer-sendgrid-transport');
 
 const User = require('../models/user');
 
