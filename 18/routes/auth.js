@@ -17,11 +17,12 @@ router.post('/login',
 check('email')
 .isEmail()
 .withMessage('Invalid Email')
+.normalizeEmail()                             //sanatice input email start with lower case and is trim
 .custom((value, {req})=>{ 
-    return User.findOne({ email: value })  //custom function wait for promise,boolean,throw,etc to be return 
+    return User.findOne({ email: value })  
     .then(userDoc => {
         if (!userDoc) {
-            return Promise.reject('Email id do exist');          //if we return rejected promise to function it create error
+            return Promise.reject('Email id do exist');    //don't catch becoz it will be handle by custom() of express-validator
         }
         return bcrypt.compare(req.body.password, userDoc.password)
             .then(doMatch => {
@@ -47,6 +48,7 @@ router.post('/signup',
 check('email')
 .isEmail()                                   //built to check if email is valid email
 .withMessage('Please enter the valid email') //only if isEmail fail this message is set we have to write again and again for all validator //if validation fail we can add our custom error message default is 'Invalid value'
+.normalizeEmail()
 .custom((value, {req})=>{                 //value is 'email' as pass 'email' to check() function //second argument is object containg various property in case we want something from request use req other are :-location,path
     // if(value === 'test@test.com')
     //     throw new Error('This email address is forbidden');
@@ -61,8 +63,10 @@ check('email')
 }),
 body('password', 'please enter password more then five character')  //if we want same withMessage() for all validation fail we can add it as second argument instead of writting it again and again for each validator
 .isLength({min: 5})   //also take max property
-.isAlphanumeric(),
+.isAlphanumeric()
+.trim(),                                    
 body('confirmPassword')
+.trim()                                   //sanitize input remove white space
 .custom((value, {req})=>{
     if(value !== req.body.password)
         throw new Error("both password don't match");

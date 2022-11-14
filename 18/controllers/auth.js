@@ -26,7 +26,12 @@ exports.getLogin = (req, res, next) => {
   res.render('auth/login', {
     path: '/login',
     pageTitle: 'Login',
-    errorMessage: message
+    errorMessage: message,
+    oldInput: {
+      email: '',
+      password: ''
+    },
+    validationErrors: []
   });
 };
 
@@ -61,12 +66,11 @@ exports.postLogin = (req, res, next) => {
       path: '/login',
       pageTitle: 'Login',
       errorMessage: errors.array()[0].msg,     
-      // oldInput: {
-      //   email,
-      //   password,
-      //   confirmPassword
-      // },
-      // validationErrors: errors.array()
+      oldInput: {
+        email,
+        password
+      },
+      validationErrors: errors.array()
     });
   }
   User.findOne({ email: email })
