@@ -1,0 +1,14 @@
+1:- 
+const fileStorage = multer.diskStorage({ //where to store file
+    destination: (req, file, cb) => {  
+      cb(null, 'images');
+    },
+    filename: (req, file, cb) => { 
+      cb(null, new Date().toISOString().replaceAll(':', '-') + file.originalname);     //window file name do not support '-' character so replace it
+    }
+  });
+
+
+
+2:-
+const imageUrl = req.file.path.replaceAll('\\', '/');  //multor attach file(object) on request which in then return req.file.path of linux/mac  so replace '\' by '/' to get file path in windows format

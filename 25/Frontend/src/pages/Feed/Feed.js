@@ -52,7 +52,7 @@ class Feed extends Component {
     }
 
     //getposts()
-    fetch('http://localhost:8080/feed/posts')
+    fetch('http://localhost:8080/feed/posts?currentPage=' + page)
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -61,7 +61,13 @@ class Feed extends Component {
       }) 
       .then(resData => {
         this.setState({
-          posts: resData.posts,
+          posts: resData.posts.map(post=>{
+            return {   //all post data along with imageUrl and imagePath which are same here
+              ...post,
+              imagePath: post.imageUrl   //default imagePath when editting no image is supllied then choose existing once
+              //imagePath is then store in image variable using react so we extract it using req.body.image
+            }
+          }),
           totalPosts: resData.totalItems,
           postsLoading: false
         });
@@ -108,22 +114,29 @@ class Feed extends Component {
       editLoading: true
     });
     // Set up data (with image!)
-    
-    let url = 'http://localhost:8080/feed/post';
-    let method = 'POST';
-    if (this.state.editPost) {
-      url = 'URL';
-    }
-
-    //we post data and retrive data
     const formData = new FormData();
     formData.append('title', postData.title);
     formData.append('content', postData.content);
     formData.append('image', postData.image);
+    let url = 'http://localhost:8080/feed/post';
+    let method = 'POST';
+    if (this.state.editPost) {
+      url = 'http://localhost:8080/feed/post/' + this.state.editPost._id;
+      method = 'PUT';
+    }
+
+    //we post data and retrive data
+    // const formData = new FormData();
+    // formData.append('title', postData.title);
+    // formData.append('content', postData.content);
+    // formData.append('image', postData.image);
 
     fetch(url,{  //if we use FormData() header are set automatically
       method,
       body: formData
+      // headers: {
+      //   'Content-Type': 'multipart/form-data'
+      // },
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
@@ -174,8 +187,11 @@ class Feed extends Component {
   };
 
   deletePostHandler = postId => {
+    console.log(postId);
     this.setState({ postsLoading: true });
-    fetch('URL')
+    fetch('http://localhost:8080/feed/post/' + postId,{ //remember always check url that you send request
+      method: 'DELETE'
+    })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error('Deleting a post failed!');
