@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
 const feedRoutes = require('./routes/feed');
+const authRoutes = require('./routes/auth');
 const multer = require('multer'); //to store incoming file from requst
 
 const app = express();
@@ -44,11 +45,13 @@ app.use('/images', express.static(path.join(__dirname, 'images')));  //public av
 app.use(bodyParser.json()); // application/json
 
 app.use('/feed', feedRoutes);
+app.use('/auth', authRoutes);
 
-app.use((error, req,res,next)=>{  //custom error handling function
+app.use((error, req, res, next)=>{  //custom error handling function
     const status = error.statusCode || 500;
     const message = error.message;
-    res.status(status).json({message});
+    const data = error.data;
+    res.status(status).json({message, data});
 })
 
 mongoose.connect('mongodb+srv://Shubham:8806166977a@cluster0.pjapwbk.mongodb.net/messages?retryWrites=true&w=majority')

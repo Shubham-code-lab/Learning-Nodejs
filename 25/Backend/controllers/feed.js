@@ -123,7 +123,7 @@ exports.updatePost = (req, res, next)=>{
     error.statusCode = 422;
     throw error;
   }
-
+  
   Post.findById(postId)
   .then(post=>{
     if(!post){
