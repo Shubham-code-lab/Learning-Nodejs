@@ -2,6 +2,7 @@ const {validationResult} = require('express-validator/check');
 const fs = require('fs');
 const path = require('path');
 const Post = require('../models/post.js'); 
+const User = require('../models/user.js');
 
 exports.getPosts = (req, res, next) => {
   const currentPage = req.query.currentPage || 1;
@@ -51,27 +52,32 @@ exports.createPost = (req, res, next) => {
     title,
     content,
     imageUrl,
-    creator: {
-      name: 'Maximilian'
-    }
+    creator: req.userId  //from is-auth.js mongoose convert String to ObjectId
     //_id and createdAt automaticaly created by mongodb
   });
 
   post.save()
   .then(post=>{
-    
-    res.status(201).json({
-      message: 'Post created successfully!',
-      post: post  //along with _id and createdAt 
-      // { 
-      //    _id: new Date().toISOString(),
-      //    title: title,
-      //    content: content,
-      //    creator: {
-      //     name: 'Maximilian'
-      //   },
-      //    createdAt: new Date() //not creating , not attaching, not creating date //so error?
-      //   }
+    User.findById(req.userId)
+    .then(user=>{
+      user.posts.push(post);  //post._id is extracted by mongoose
+      return user.save();
+    })
+    .then(user=>{
+      res.status(201).json({
+        message: 'Post created successfully!',
+        post: post,  //along with _id and createdAt 
+        creator: {_id:user._id, name:user.name}
+        // { 
+        //    _id: new Date().toISOString(),
+        //    title: title,
+        //    content: content,
+        //    creator: {
+        //     name: 'Maximilian'
+        //   },
+        //    createdAt: new Date() //not creating , not attaching, not creating date //so error?
+        //   }
+      });
     });
   })
   .catch(err=>{
@@ -131,6 +137,11 @@ exports.updatePost = (req, res, next)=>{
       error.statusCode = 404;
       throw error;
     }
+    if(post.creator.toString() !== req.userId){
+      const error = new Error("No Authorized User");
+      error.statusCode = 403;
+      throw error;
+    }
     if(imageUrl !== post.imageUrl){ //image change
       clearImage(post.imageUrl);
     }
@@ -161,12 +172,29 @@ exports.deletePost = (req, res, next)=>{
       throw error;
     }
     //check if post belong to user
-
+    if(post.creator.toString() !== req.userId){
+      const error = new Error("No Authorized User");
+      error.statusCode = 403;
+      throw error;
+    }
     clearImage(post.imageUrl);
     return Post.findByIdAndRemove(postId);
   })
   .then(result=>{
-    res.status(200).json({message: 'Delete post successfully'});
+    User.findById(result.creator.toString())
+    .then(user=>{
+      user.posts.pull(postId);
+      return user.save();
+    })
+    .then(user=>{
+      res.status(200).json({message: 'Delete post successfully'});
+    })
+    .catch(err=>{
+      if(!err.statusCode){ 
+        err.statusCode = 500; 
+      }
+      next(err);
+    })
   })
   .catch(err=>{
     if(!err.statusCode){ 

@@ -52,7 +52,11 @@ class Feed extends Component {
     }
 
     //getposts()
-    fetch('http://localhost:8080/feed/posts?currentPage=' + page)
+    fetch('http://localhost:8080/feed/posts?currentPage=' + page,{
+      headers:{
+        Authorization: 'Bearer ' + this.props.token
+      }
+    })
       .then(res => {
         if (res.status !== 200) {
           throw new Error('Failed to fetch posts.');
@@ -133,6 +137,9 @@ class Feed extends Component {
 
     fetch(url,{  //if we use FormData() header are set automatically
       method,
+      headers:{
+        Authorization: 'Bearer ' + this.props.token
+      },
       body: formData
       // headers: {
       //   'Content-Type': 'multipart/form-data'
@@ -190,7 +197,10 @@ class Feed extends Component {
     console.log(postId);
     this.setState({ postsLoading: true });
     fetch('http://localhost:8080/feed/post/' + postId,{ //remember always check url that you send request
-      method: 'DELETE'
+      method: 'DELETE',
+      headers:{
+        Authorization: 'Bearer ' + this.props.token
+      }
     })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
